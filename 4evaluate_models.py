@@ -1,4 +1,3 @@
-# spot check for ES2
 from pandas import read_csv
 from matplotlib import pyplot
 from sklearn.metrics import accuracy_score
@@ -10,13 +9,17 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
+# use the simple neural_network here:
+from sklearn.neural_network import MLPClassifier
+
 # load dataset
 prefix = "IndoorMovement/"
 
 train = read_csv(prefix + 'es2_train.csv', header=None)
 test = read_csv(prefix + 'es2_test.csv', header=None)
+
 # split into inputs and outputs
-trainX, trainy = train.values[:, :-1], train.values[:, -1]
+trainX, trainY = train.values[:, :-1], train.values[:, -1]
 testX, testy = test.values[:, :-1], test.values[:, -1]
 # create a list of models to evaluate
 models, names = list(), list()
@@ -42,13 +45,19 @@ names.append('RF')
 models.append(GradientBoostingClassifier())
 names.append('GBM')
 # evaluate models
+
+# adds the neural network
+models.append(MLPClassifier())
+names.append("Simple Neural Network")
+
+
 all_scores = list()
 for i in range(len(models)):
     scaler = StandardScaler()
     model = Pipeline(steps=[('s',scaler), ('m',models[i])])
     # fit
     # model = models[i]
-    model.fit(trainX, trainy)
+    model.fit(trainX, trainY)
     # predict
     yhat = model.predict(testX)
     # evaluate
@@ -56,6 +65,7 @@ for i in range(len(models)):
     all_scores.append(score)
     # summarize
     print('%s %.3f%%' % (names[i], score))
+
 # plot
 pyplot.bar(names, all_scores)
 pyplot.show()
